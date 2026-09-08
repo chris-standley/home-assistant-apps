@@ -1,7 +1,7 @@
 # Home Assistant app configuration for Jellyfin (NVIDIA / NVENC)
 # Docs: https://developers.home-assistant.io/docs/apps/configuration
 name: Jellyfin (NVIDIA)
-version: "1.0.0"
+version: "1.0.1"
 slug: jellyfin_nvidia
 description: >-
   Jellyfin media system with NVIDIA NVENC hardware transcoding. Requires a host
