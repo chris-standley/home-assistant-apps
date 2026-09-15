@@ -10,7 +10,7 @@
 #
 # Since Supervisor 2026.04.0 the BUILD_FROM arg is no longer injected, so we
 # declare our own default here.
-ARG BUILD_FROM=ghcr.io/jellyfin/jellyfin@sha256:74f4d87d9cf262c52d62be6be265c0355c6a7e21d0477ab6c654a49a4f8b1fd4
+ARG BUILD_FROM=ghcr.io/jellyfin/jellyfin@sha256:008ec8024bdaaa6f0a3f0de468e185633eeba9d67c56936e8dbf5ef6b8d6200f
 FROM ${BUILD_FROM}
 
 # The upstream image already defines the entrypoint that launches Jellyfin, so
