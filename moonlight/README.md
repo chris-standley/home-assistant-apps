@@ -6,7 +6,7 @@ lists, a meal planner and a photo screensaver, made for wall-mounted
 touchscreens and phones.
 
 - **Sidebar:** opens in Home Assistant through **ingress**
-- **Wall screens:** port `8099` (`http://<ha-host>:8099/display/hallway`,
+- **Wall screens:** port `8091` (`http://<ha-host>:8091/display/hallway`,
   `kitchen` or `phone`), each paired once with a 6-digit code
 - **Data:** the app's own `/data` (backed up, survives updates)
 

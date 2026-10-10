@@ -27,7 +27,7 @@ run both at once.)
 
 | App | Folder | Port |
 | --- | --- | --- |
-| **Moonlight** — family wall calendar, chores, lists and meals ([source](https://github.com/chris-standley/Moonlight-Calendar)) | [`moonlight`](./moonlight) | `8099` |
+| **Moonlight** — family wall calendar, chores, lists and meals ([source](https://github.com/chris-standley/Moonlight-Calendar)) | [`moonlight`](./moonlight) | `8091` |
 
 > **Which GPU variant?** *Quick Sync* is Intel-only; AMD uses its VCN encoder.
 > On Linux both are reached through the same `/dev/dri` render node, so the
