@@ -2,7 +2,8 @@
 
 A Home Assistant apps repository that wraps **official** upstream Docker images
 so they can be installed and managed as Home Assistant apps — currently
-**Channels DVR** and **Jellyfin**, each with an Intel/AMD and an NVIDIA variant.
+**Channels DVR** and **Jellyfin**, each with an Intel/AMD and an NVIDIA variant —
+plus my own **Moonlight** family wall calendar.
 
 > ## ⚠️ Unofficial — not affiliated with the upstream projects
 >
@@ -23,6 +24,10 @@ run both at once.)
 | --- | --- | --- | --- |
 | **Channels DVR** — live TV DVR from HDHomeRun / TV Everywhere | [`channels_dvr`](./channels_dvr) | [`channels_dvr_nvidia`](./channels_dvr_nvidia) | `8089` |
 | **Jellyfin** — free software media system | [`jellyfin`](./jellyfin) | [`jellyfin_nvidia`](./jellyfin_nvidia) | `8096` |
+
+| App | Folder | Port |
+| --- | --- | --- |
+| **Moonlight** — family wall calendar, chores, lists and meals ([source](https://github.com/chris-standley/Moonlight-Calendar)) | [`moonlight`](./moonlight) | `8099` |
 
 > **Which GPU variant?** *Quick Sync* is Intel-only; AMD uses its VCN encoder.
 > On Linux both are reached through the same `/dev/dri` render node, so the
@@ -73,6 +78,15 @@ Home Assistant surfaces an **Update** (with a note) on its own — no manual
 version bumping. You can also **Run workflow** manually from the **Actions** tab,
 or use **Rebuild** on an app's Info page to rebuild from the pinned digest.
 
+**Moonlight** is different: its code lives in
+[chris-standley/Moonlight-Calendar](https://github.com/chris-standley/Moonlight-Calendar),
+which publishes a prebuilt image per architecture. Its `config.yaml` points at
+that image, so nothing is built on the Home Assistant host. A second workflow,
+[`.github/workflows/sync-moonlight.yml`](.github/workflows/sync-moonlight.yml),
+checks every few hours and, once a new version's images are published, copies
+Moonlight's manifest and docs into `moonlight/` and adds a changelog entry, so
+the update shows up in Home Assistant.
+
 Beyond the base image:
 
 - **Channels DVR** also self-updates its server binary at runtime (the image is
@@ -116,15 +130,17 @@ Each app splits the same way:
 ├── repository.yaml          # Repository metadata (name, url, maintainer)
 ├── README.md                # This file
 ├── DISCLAIMER.md            # Full non-affiliation / trademark statement
-├── .github/workflows/       # CI: auto-update each app's base image digest + version
+├── .github/workflows/       # CI: auto-update each app's base image digest + version; sync Moonlight
 ├── channels_dvr/            # Channels DVR — Intel / AMD (VA-API)
 ├── channels_dvr_nvidia/     # Channels DVR — NVIDIA (NVENC)
 ├── jellyfin/                # Jellyfin — Intel / AMD (VA-API)
-└── jellyfin_nvidia/         # Jellyfin — NVIDIA (NVENC)
+├── jellyfin_nvidia/         # Jellyfin — NVIDIA (NVENC)
+└── moonlight/               # Moonlight — prebuilt image from chris-standley/Moonlight-Calendar
 ```
 
 Each app folder contains: `config.yaml` (manifest), `Dockerfile` (wraps the
 digest-pinned official image), `README.md`, `DOCS.md`, and `CHANGELOG.md`.
+`moonlight/` has no `Dockerfile`: its manifest names a prebuilt image instead.
 
 ### Optional assets
 
