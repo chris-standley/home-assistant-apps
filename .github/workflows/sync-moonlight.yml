@@ -1,0 +1,99 @@
+name: Sync Moonlight
+
+# Moonlight's code and images live in chris-standley/Moonlight-Calendar, which
+# publishes ghcr.io/chris-standley/{arch}-moonlight-addon:<version> for amd64
+# and aarch64. This workflow copies that repo's app manifest (addon/config.yaml),
+# DOCS.md and translations into moonlight/ once the images for a new version are
+# published, and prepends a CHANGELOG.md entry, so Home Assistant offers the
+# update. Runs every few hours and can be triggered manually.
+
+on:
+  schedule:
+    - cron: "17 */4 * * *" # every 4 hours (GitHub may delay scheduled runs)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-moonlight
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy the manifest if a new version is published
+        id: sync
+        env:
+          SRC: https://raw.githubusercontent.com/chris-standley/Moonlight-Calendar/main/addon
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          curl -fsSL "$SRC/config.yaml" -o "$tmp/config.yaml"
+          curl -fsSL "$SRC/DOCS.md" -o "$tmp/DOCS.md"
+          curl -fsSL "$SRC/translations/en.yaml" -o "$tmp/en.yaml"
+
+          version_of() { grep -oE '^version:[[:space:]]*"?[0-9]+\.[0-9]+\.[0-9]+' "$1" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'; }
+          new="$(version_of "$tmp/config.yaml")"
+          cur="$(version_of moonlight/config.yaml)"
+          if [ -z "$new" ]; then
+            echo "::error::Could not read the version from Moonlight's addon/config.yaml"
+            exit 1
+          fi
+          if [ "$new" = "$cur" ]; then
+            echo "moonlight: up to date (${cur})"
+            echo "changed=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Only offer the update once both images exist, or Home Assistant can't pull it.
+          for arch in amd64 aarch64; do
+            repo="chris-standley/${arch}-moonlight-addon"
+            token="$(curl -fsSL "https://ghcr.io/token?scope=repository:${repo}:pull" | jq -r .token)"
+            if ! curl -fsS -o /dev/null \
+              -H "Authorization: Bearer ${token}" \
+              -H "Accept: application/vnd.oci.image.index.v1+json" \
+              -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+              "https://ghcr.io/v2/${repo}/manifests/${new}"; then
+              echo "moonlight: ${new} is not published for ${arch} yet; leaving ${cur}"
+              echo "changed=0" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          echo "moonlight: ${cur} -> ${new}"
+          cp "$tmp/config.yaml" moonlight/config.yaml
+          mkdir -p moonlight/translations
+          cp "$tmp/en.yaml" moonlight/translations/en.yaml
+          # The source DOCS.md is written for this repository's URL already.
+          cp "$tmp/DOCS.md" moonlight/DOCS.md
+
+          changelog=moonlight/CHANGELOG.md
+          [ -f "$changelog" ] || printf '# Changelog\n' > "$changelog"
+          {
+            echo "# Changelog"
+            echo
+            echo "## ${new} — $(date -u +%Y-%m-%d)"
+            echo
+            echo "- Updated to Moonlight ${new}. Changes:"
+            echo "  https://github.com/chris-standley/Moonlight-Calendar/commits/main"
+            echo
+            tail -n +2 "$changelog"
+          } > "${changelog}.tmp"
+          mv "${changelog}.tmp" "$changelog"
+          echo "changed=1" >> "$GITHUB_OUTPUT"
+          echo "version=${new}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        if: steps.sync.outputs.changed == '1'
+        env:
+          VERSION: ${{ steps.sync.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A moonlight
+          git commit -m "chore: update Moonlight to ${VERSION}"
+          git push
