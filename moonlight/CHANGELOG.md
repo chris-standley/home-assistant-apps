@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.10 — 2026-10-12
+
+- Updated to Moonlight 0.3.10. Changes:
+  https://github.com/chris-standley/Moonlight-Calendar/commits/main
+
+
 ## 0.3.9 — 2026-10-12
 
 - Updated to Moonlight 0.3.9. Changes:
