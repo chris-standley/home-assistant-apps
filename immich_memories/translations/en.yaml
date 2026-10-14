@@ -1,0 +1,78 @@
+configuration:
+  immich_url:
+    name: Immich URL
+    description: >-
+      Leave empty to find the Immich app on this Home Assistant automatically. Otherwise Immich's address as this
+      app can reach it, e.g. http://homeassistant.local:2283.
+  immich_api_key:
+    name: Immich API key
+    description: >-
+      Create one in Immich under Account Settings > API Keys. It needs asset, album, album asset, stack, person,
+      duplicate and server permissions (or "all").
+  run_time:
+    name: Daily run time
+    description: When to look for new memories each day (24-hour HH:MM, Home Assistant's time zone).
+  run_on_start:
+    name: Run when started
+    description: Also look for memories as soon as the app starts.
+  dry_run:
+    name: Dry run
+    description: Log the albums it would make, without changing anything in Immich.
+  ai_names:
+    name: AI album names
+    description: >-
+      Ask Home Assistant's AI to polish album names (e.g. "Walk in the Lake District with Emma"). Uses the AI Task
+      entity or conversation agent below. Falls back to template names if no AI is set up.
+  ai_task_entity:
+    name: AI Task entity
+    description: >-
+      The AI Task entity to use, e.g. ai_task.openai_ai_task. Leave empty for Home Assistant's default. Enter "none"
+      to skip AI Task and use only the conversation agent.
+  conversation_agent:
+    name: Conversation agent
+    description: >-
+      Fallback for older Home Assistant versions or setups without AI Task: an LLM conversation agent such as
+      conversation.chatgpt.
+  create_stacks:
+    name: Stack similar photos
+    description: >-
+      Stack near-identical shots in Immich, with the best one (most people looking at the camera with eyes open,
+      sharpest) on top.
+  max_photos_per_album:
+    name: Most photos per album
+  max_albums_per_run:
+    name: Most new albums per run
+    description: Spreads a big first run over several days, newest memories first. 0 means no limit.
+  min_photos_trip:
+    name: Photos needed for a trip or day out
+  min_photos_holiday:
+    name: Photos needed for a holiday or birthday
+  min_photos_spike:
+    name: Photos needed for a busy day
+    description: A day at home becomes a memory when it has at least this many photos...
+  spike_factor:
+    name: Busy day factor
+    description: ...and at least this many times the usual number of photos for that time of year.
+  home_radius_km:
+    name: Home radius (km)
+    description: Photos further than this from Home Assistant's home location count as being away.
+  holiday_country:
+    name: Holiday country
+    description: Two-letter country code for public holidays, e.g. GB. Leave empty to use Home Assistant's country.
+  holiday_subdivision:
+    name: Holiday region
+    description: Optional region code for public holidays, e.g. ENG, SCT, WLS or NIR in the UK.
+  exclude_people_from_names:
+    name: Leave out of names
+    description: >-
+      People never to name in album titles, usually yourself (you're in most photos, so "with Chris" says nothing).
+  earliest_date:
+    name: Earliest date
+    description: Only look at photos taken on or after this date (YYYY-MM-DD). Leave empty for the whole library.
+  remove_created:
+    name: Remove created albums
+    description: >-
+      Undo: delete every album and stack this app has made, then stop. Your photos are not touched. Turn it off
+      again to start over.
+  log_level:
+    name: Log level

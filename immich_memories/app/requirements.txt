@@ -1,0 +1,5 @@
+holidays==0.106
+numpy==2.5.3
+opencv-python-headless==4.14.0.94
+python-dateutil==2.9.0.post0
+requests==2.34.2

@@ -30,6 +30,17 @@ project does **not** modify or redistribute the upstream software itself.
 - For official support: <https://jellyfin.org> and
   <https://forum.jellyfin.org>.
 
+## Immich Memories app
+
+- Not affiliated with, endorsed by, or supported by the **Immich project** or
+  FUTO.
+- "Immich" and related names and logos are trademarks of their respective
+  owners, used only to describe what the app works with. No trademark ownership
+  or endorsement is claimed or implied.
+- This app is original code that talks to your own Immich server through
+  Immich's public API; it does not package or modify Immich. It uses OpenCV's
+  YuNet face detection model (MIT licence), downloaded when the app is built.
+
 ## General
 
 - This project is not affiliated with or endorsed by Home Assistant / the Open

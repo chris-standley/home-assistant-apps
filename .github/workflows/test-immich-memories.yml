@@ -1,0 +1,47 @@
+name: Test Immich Memories
+
+# Runs the Immich Memories app's tests (against a fake Immich library) and
+# checks its image builds, whenever the app changes.
+
+on:
+  pull_request:
+    paths:
+      - "immich_memories/**"
+      - ".github/workflows/test-immich-memories.yml"
+  push:
+    branches: [main]
+    paths:
+      - "immich_memories/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: immich_memories
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install -r app/requirements.txt pytest
+      - name: Run tests
+        run: python -m pytest -q
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t immich-memories immich_memories
+      - name: Check the face detector loads
+        run: >-
+          docker run --rm immich-memories python3 -c
+          "from immich_memories.analysis import Analyzer; import numpy as np, cv2;
+          a = Analyzer().analyse(cv2.imencode('.jpg', np.full((480, 640, 3), 128, np.uint8))[1].tobytes());
+          print(a)"
