@@ -35,6 +35,9 @@ PLACES = {
     "rome": (41.90, 12.50, "Rome", "Lazio", "Italy"),
     "dubrovnik": (42.65, 18.09, "Dubrovnik", "Dubrovnik-Neretva", "Croatia"),
     "athens": (37.98, 23.73, "Athens", "Attica", "Greece"),
+    "keswick": (54.60, -3.13, "Keswick", "England", "United Kingdom"),
+    "bergen": (60.39, 5.32, "Bergen", "Vestland", "Norway"),
+    "tromso": (69.65, 18.96, "Tromsø", "Troms", "Norway"),
 }
 
 _counter = itertools.count()
@@ -143,6 +146,10 @@ class FakeImmich:
         sid = f"stack-{len(self.stacks)}"
         self.stacks[sid] = ids
         return sid
+
+    def add_to_album(self, album_id, asset_ids):
+        album = next(a for a in self.albums_made if a["id"] == album_id)
+        album["assets"] = album["assets"] + [i for i in asset_ids if i not in album["assets"]]
 
     def delete_album(self, album_id):
         self.albums_made = [a for a in self.albums_made if a["id"] != album_id]

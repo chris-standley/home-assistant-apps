@@ -9,4 +9,7 @@
   house.
 - Stacks near-identical shots with the best one on top: most people facing the
   camera with their eyes open, then the sharpest.
+- Collections that grow each year: holiday seasons (*Christmas through the
+  years*), birthdays, holidays in a country (*Holidays in Norway*) and repeat
+  visits to an area (*Trips to the Lake District*).
 - Dry run, and a one-switch undo that removes everything it made.

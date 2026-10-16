@@ -65,6 +65,9 @@ def make_handler(fake):
             if path.startswith("/api/albums/") and method == "PATCH":
                 fake.set_album_cover(path.split("/")[3], body["albumThumbnailAssetId"])
                 return self._send(200, {})
+            if path.startswith("/api/albums/") and path.endswith("/assets") and method == "PUT":
+                fake.add_to_album(path.split("/")[3], body["ids"])
+                return self._send(200, [{"id": i, "success": True} for i in body["ids"]])
             if path.startswith("/api/albums/") and method == "DELETE":
                 fake.delete_album(path.split("/")[3])
                 return self._send(204)
@@ -83,6 +86,9 @@ def make_handler(fake):
 
         def do_PATCH(self):
             self._route("PATCH")
+
+        def do_PUT(self):
+            self._route("PUT")
 
         def do_DELETE(self):
             self._route("DELETE")

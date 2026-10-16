@@ -258,6 +258,9 @@ class Immich:
     def set_album_cover(self, album_id: str, asset_id: str) -> None:
         self.patch(f"/albums/{album_id}", {"albumThumbnailAssetId": asset_id})
 
+    def add_to_album(self, album_id: str, asset_ids: list[str]) -> None:
+        self.put(f"/albums/{album_id}/assets", {"ids": asset_ids})
+
     def delete_album(self, album_id: str) -> None:
         self.delete(f"/albums/{album_id}")
 

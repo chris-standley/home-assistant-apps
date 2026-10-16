@@ -107,6 +107,24 @@ provider.
 
 Every album's description ends with *Made by Immich Memories*.
 
+**Collections**
+
+Alongside one album per memory, the app keeps albums that gather a recurring
+kind of memory and grow each year:
+
+| Collection | Gathers |
+| --- | --- |
+| *Christmas through the years* (and Easter, Halloween, New Year's Eve...) | Every year's memory of that holiday, including trips over it. |
+| *Jack's birthdays* | Every birthday memory for that person. |
+| *Holidays in Norway* | Every trip spent mostly in a country other than your home country. |
+| *Trips to the Lake District* | Trips and days out in the same area in your home country (their photos centre within about 30 km of each other). The AI names the area from the towns visited; without AI it's *Trips to* the most visited town. |
+
+A collection starts once there are two memories of its kind (two different
+years for a holiday). Each memory adds its best 12 photos. On every run,
+new memories' photos are added to the collections they belong to. Photos you
+take out of a collection aren't put back, and a collection you delete isn't
+made again. Turn **Collections** off to stop making and topping them up.
+
 ## Options
 
 | Option | Default | What it does |
@@ -130,13 +148,15 @@ Every album's description ends with *Made by Immich Memories*.
 | Holiday country / region | *(Home Assistant's)* | e.g. `GB` and `ENG`. |
 | Leave out of names | | People never named in titles, usually yourself. |
 | Earliest date | | Ignore photos before this date (`YYYY-MM-DD`). |
+| Collections | on | Keep albums that grow each year (see Collections). |
+| Memories needed for a collection | `2` | How many memories of a kind before a collection starts. |
 | Remove created albums | off | Undo (see below). |
 
 ## Undo and changes
 
 - **Delete an album** you don't like in Immich and it won't be made again.
 - **Remove created albums:** turn it on and restart the app to delete every
-  album and stack it made (your photos stay where they are). It then stops;
+  album, collection and stack it made (your photos stay where they are). It then stops;
   turn it off again to start over.
 - The app remembers what it has made in its own storage, so reruns only add
   new memories.

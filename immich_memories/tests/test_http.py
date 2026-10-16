@@ -46,3 +46,21 @@ def test_bad_api_key_is_reported(monkeypatch):
 def test_url_gets_api_suffix():
     assert Immich("http://immich:2283", "k").base == "http://immich:2283/api"
     assert Immich("http://immich:2283/api/", "k").base == "http://immich:2283/api"
+
+
+def test_collections_over_http(tmp_path):
+    from test_collections import christmas, library
+
+    fake = FakeImmich(library())
+    server = serve(fake)
+    try:
+        opts = Options(immich_url=f"http://127.0.0.1:{server.server_port}", immich_api_key=API_KEY)
+        client = connect(opts, FakeHA())
+        run(opts, FakeHA(), data_dir=str(tmp_path), today=date(2024, 1, 10), immich=client)
+        before = len(next(a for a in fake.albums_made if a["name"] == "Christmas through the years")["assets"])
+        fake.assets = fake.assets + christmas(2024)
+        run(opts, FakeHA(), data_dir=str(tmp_path), today=date(2025, 1, 10), immich=client)
+        after = len(next(a for a in fake.albums_made if a["name"] == "Christmas through the years")["assets"])
+        assert after > before
+    finally:
+        server.shutdown()

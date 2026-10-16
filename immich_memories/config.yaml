@@ -6,7 +6,8 @@ slug: immich_memories
 description: >-
   Apple Photos style memories for Immich. Finds trips, days out, holidays,
   birthdays and busy days, picks the best photos (no screenshots or receipts),
-  stacks near-identical shots and makes friendly-named albums.
+  stacks near-identical shots and makes friendly-named albums, plus
+  collections that grow each year (Christmas, Holidays in Norway...).
 url: https://github.com/chris-standley/home-assistant-apps/tree/main/immich_memories
 arch:
   - aarch64
@@ -39,6 +40,8 @@ options:
   spike_factor: 3
   home_radius_km: 40
   exclude_people_from_names: []
+  collections: true
+  min_memories_for_collection: 2
   remove_created: false
   log_level: info
 schema:
@@ -63,5 +66,7 @@ schema:
   exclude_people_from_names:
     - str
   earliest_date: match(^\d{4}-\d{2}-\d{2}$)?
+  collections: bool
+  min_memories_for_collection: int(2,50)
   remove_created: bool
   log_level: list(debug|info|warning|error)

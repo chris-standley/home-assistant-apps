@@ -15,6 +15,7 @@ from .homeassistant import HomeAssistant
 from .immich import Immich, ImmichError
 from .labels import LabelIndex
 from .naming import describe, gather_facts, name_event
+from .recurring import summarise_event, update as update_collections
 from .state import MARKER, State
 
 log = logging.getLogger(__name__)
@@ -40,6 +41,8 @@ class Options:
     holiday_subdivision: str = ""
     exclude_people_from_names: list[str] = field(default_factory=list)
     earliest_date: str = ""
+    collections: bool = True
+    min_memories_for_collection: int = 2
     remove_created: bool = False
 
     @classmethod
@@ -90,6 +93,7 @@ def undo(immich: Immich, state: State, dry_run: bool) -> None:
         except ImmichError as err:
             log.debug("Stack %s already gone: %s", stack_id, err)
     state.data["events"] = {}
+    state.data["collections"] = {}
     state.save()
     log.info("Done. Turn 'Remove created albums' off again to start making memories.")
 
@@ -142,6 +146,10 @@ def run(opts: Options, ha: HomeAssistant, data_dir: str = "/data", today: date |
     if home:
         near = Counter(p.city for p in keep if p.has_gps and p.city and haversine_km(home, (p.lat, p.lon)) < opts.home_radius_km)
         home_city = near.most_common(1)[0][0] if near else None
+    home_country = None
+    if home:
+        near = Counter(p.country for p in keep if p.has_gps and p.country and haversine_km(home, (p.lat, p.lon)) < opts.home_radius_km)
+        home_country = near.most_common(1)[0][0] if near else None
 
     birthdays = {}
     try:
@@ -164,8 +172,6 @@ def run(opts: Options, ha: HomeAssistant, data_dir: str = "/data", today: date |
     events = detect_events(keep, settings, birthdays, today=today)
     new = [e for e in events if not state.overlaps(e.start, e.end)]
     log.info("Found %d events, %d of them new", len(events), len(new))
-    if not new:
-        return []
     # Newest first, so recent memories appear first; older ones follow on later runs.
     new.sort(key=lambda e: e.start, reverse=True)
     if opts.max_albums_per_run and len(new) > opts.max_albums_per_run:
@@ -214,6 +220,9 @@ def run(opts: Options, ha: HomeAssistant, data_dir: str = "/data", today: date |
             "end": event.end.isoformat(),
             "photos": len(chosen),
             "candidates": len(event.photos),
+            "holiday": event.holiday,
+            "person": event.person,
+            **summarise_event(event.photos, chosen, scores),
         }
         if opts.dry_run:
             log.info(
@@ -244,4 +253,7 @@ def run(opts: Options, ha: HomeAssistant, data_dir: str = "/data", today: date |
             name, len(chosen), len(event.photos), f", {len(stacks)} stacks" if stacks else "",
         )
     state.save()
+
+    if opts.collections:
+        update_collections(immich, state, home_country, ai, opts.dry_run, opts.min_memories_for_collection)
     return made

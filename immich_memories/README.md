@@ -19,6 +19,9 @@ makes an album for each one with a friendly name, such as
   sharpest.
 - **Names albums** from Immich's places, people and dates, optionally polished
   by whatever AI you've set up in Home Assistant.
+- **Collections that grow each year:** *Christmas through the years*,
+  *Jack's birthdays*, *Holidays in Norway*, *Trips to the Lake District*,
+  topped up with each new memory's best photos.
 - **Easy to undo:** albums are marked as made by this app, and one switch
   removes them all.
 

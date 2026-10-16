@@ -69,6 +69,14 @@ configuration:
   earliest_date:
     name: Earliest date
     description: Only look at photos taken on or after this date (YYYY-MM-DD). Leave empty for the whole library.
+  collections:
+    name: Collections
+    description: >-
+      Also keep albums that grow each year: "Christmas through the years", "Jack's birthdays", "Holidays in
+      Norway", "Trips to the Lake District". New memories' best photos are added on each run.
+  min_memories_for_collection:
+    name: Memories needed for a collection
+    description: How many memories of the same kind (years of a holiday, visits to a place) before a collection starts.
   remove_created:
     name: Remove created albums
     description: >-
