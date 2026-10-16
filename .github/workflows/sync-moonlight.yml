@@ -5,11 +5,15 @@ name: Sync Moonlight
 # and aarch64. This workflow copies that repo's app manifest (addon/config.yaml),
 # DOCS.md and translations into moonlight/ once the images for a new version are
 # published, and prepends a CHANGELOG.md entry, so Home Assistant offers the
-# update. Runs every few hours and can be triggered manually.
+# update. Moonlight's image workflow starts it right after a push to GHCR
+# (repository_dispatch, needs a token there); it also checks every 15 minutes and
+# can be run by hand.
 
 on:
+  repository_dispatch:
+    types: [moonlight-image-published]
   schedule:
-    - cron: "17 */4 * * *" # every 4 hours (GitHub may delay scheduled runs)
+    - cron: "*/15 * * * *" # GitHub may delay scheduled runs
   workflow_dispatch: {}
 
 permissions:
