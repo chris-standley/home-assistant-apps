@@ -33,6 +33,7 @@ jobs:
             ["channels_dvr_nvidia"]="fancybits/channels-dvr:nvidia"
             ["jellyfin"]="ghcr.io/jellyfin/jellyfin:latest"
             ["jellyfin_nvidia"]="ghcr.io/jellyfin/jellyfin:latest"
+            ["immich_memories"]="library/python:3.13-slim"
           )
 
           # Resolve the manifest (list) digest for an image ref, on Docker Hub

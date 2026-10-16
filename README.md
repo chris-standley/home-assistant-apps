@@ -3,7 +3,7 @@
 A Home Assistant apps repository that wraps **official** upstream Docker images
 so they can be installed and managed as Home Assistant apps — currently
 **Channels DVR** and **Jellyfin**, each with an Intel/AMD and an NVIDIA variant —
-plus my own **Moonlight** family wall calendar.
+plus my own **Moonlight** family wall calendar and **Immich Memories**.
 
 > ## ⚠️ Unofficial — not affiliated with the upstream projects
 >
@@ -28,6 +28,7 @@ run both at once.)
 | App | Folder | Port |
 | --- | --- | --- |
 | **Moonlight** — family wall calendar, chores, lists and meals ([source](https://github.com/chris-standley/Moonlight-Calendar)) | [`moonlight`](./moonlight) | `8091` |
+| **Immich Memories** — Apple Photos style memories (curated, named albums) for an Immich server | [`immich_memories`](./immich_memories) | — |
 
 > **Which GPU variant?** *Quick Sync* is Intel-only; AMD uses its VCN encoder.
 > On Linux both are reached through the same `/dev/dri` render node, so the
@@ -135,12 +136,16 @@ Each app splits the same way:
 ├── channels_dvr_nvidia/     # Channels DVR — NVIDIA (NVENC)
 ├── jellyfin/                # Jellyfin — Intel / AMD (VA-API)
 ├── jellyfin_nvidia/         # Jellyfin — NVIDIA (NVENC)
-└── moonlight/               # Moonlight — prebuilt image from chris-standley/Moonlight-Calendar
+├── moonlight/               # Moonlight — prebuilt image from chris-standley/Moonlight-Calendar
+└── immich_memories/         # Immich Memories — Python app (source in app/, tests in tests/)
 ```
 
 Each app folder contains: `config.yaml` (manifest), `Dockerfile` (wraps the
 digest-pinned official image), `README.md`, `DOCS.md`, and `CHANGELOG.md`.
 `moonlight/` has no `Dockerfile`: its manifest names a prebuilt image instead.
+`immich_memories/` also has its source (`app/`), tests (`tests/`) and option
+translations; its tests run in CI on every change
+([`.github/workflows/test-immich-memories.yml`](.github/workflows/test-immich-memories.yml)).
 
 ### Optional assets
 
