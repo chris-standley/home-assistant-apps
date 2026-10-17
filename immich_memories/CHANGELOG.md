@@ -5,8 +5,8 @@
 - Fewer similar photos. Similar shots are now matched by their colours and
   layout as well as fine detail, so reframed or zoomed shots of the same thing
   are stacked, not just bursts. Albums also skip a photo when they already have
-  one of the same scene from around the same time, and are a little smaller
-  (about 3×√photos instead of 4×).
+  one of the same scene from around the same time, so they show a range of
+  moments instead of repeats. Album sizes are unchanged.
 - New **Similar photo filtering** option: light, normal (default) or strong.
 - Fixed album names calling a day someone's birthday when it isn't: a party or
   a cake no longer makes the AI (or the template) name it after a birthday.

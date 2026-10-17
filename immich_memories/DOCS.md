@@ -107,7 +107,7 @@ photo on top, so the timeline shows only the best one.
 Then each moment is scored, favouring favourites, named people, people facing
 the camera, scenery, landmarks and sunsets (smart search), and sharp,
 well-exposed photos. The album gets a spread of the best across the whole event
-(about 3×√photos, up to *Most photos per album*), and the best one becomes its
+(about 4×√photos, up to *Most photos per album*), and the best one becomes its
 cover. It won't take two photos of the same scene from around the same time,
 even when they weren't similar enough to stack, so ten shots of one view give
 one photo.
@@ -183,7 +183,7 @@ made again. Turn **Collections** off to stop making and topping them up.
 | Conversation agent | | A conversation agent to use if AI Task isn't available. |
 | Stack similar photos | on | Stack near-identical shots with the best on top. |
 | Similar photo filtering | normal | `light`, `normal` or `strong` (see Choosing photos). |
-| Most photos per album | `50` | Albums get about 3×√(photos) photos, up to this. |
+| Most photos per album | `50` | Albums get about 4×√(photos) photos, up to this. |
 | Most new albums per run | `20` | Spreads a big first run over several days. `0` = no limit. |
 | Photos needed for a trip or day out | `15` | |
 | Photos needed for a holiday or birthday | `10` | |

@@ -175,7 +175,7 @@ def score_photos(groups: list[Group], analyses: dict[str, Analysis], labels: Lab
 
 
 def target_size(candidates: int, max_photos: int, min_photos: int = 8) -> int:
-    return max(min(candidates, min_photos), min(max_photos, round(3 * math.sqrt(candidates))))
+    return max(min(candidates, min_photos), min(max_photos, round(4 * math.sqrt(candidates))))
 
 
 def select(
