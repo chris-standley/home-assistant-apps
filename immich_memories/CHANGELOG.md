@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1
+
+- **Immich IP address** option: connect to Immich by IP while keeping its
+  hostname, for when Home Assistant can't look the hostname up. HTTPS
+  certificate checks keep working.
+- **Verify HTTPS certificate** option, to allow self-signed certificates.
+- If the Immich URL can't be reached, the app now falls back to the Immich app
+  on this Home Assistant, and the log says why the URL failed (hostname not
+  found, certificate not accepted, nothing listening) and what to try.
+
 ## 0.1.0
 
 - First release. Finds trips, days out, holidays, birthdays and unusually busy

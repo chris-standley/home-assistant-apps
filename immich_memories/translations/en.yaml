@@ -4,6 +4,16 @@ configuration:
     description: >-
       Leave empty to find the Immich app on this Home Assistant automatically. Otherwise Immich's address as this
       app can reach it, e.g. http://homeassistant.local:2283.
+  immich_ip:
+    name: Immich IP address
+    description: >-
+      Use when Home Assistant can't look up the hostname in the Immich URL: the app connects to this IP but still uses
+      the URL's hostname, so HTTPS certificate checks keep working. E.g. 192.168.1.20.
+  verify_ssl:
+    name: Verify HTTPS certificate
+    description: >-
+      Turn off only for a self-signed certificate or one that doesn't match the address. The connection is still
+      encrypted, but the app can't tell it's really talking to your Immich.
   immich_api_key:
     name: Immich API key
     description: >-

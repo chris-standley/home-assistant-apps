@@ -165,6 +165,9 @@ class FakeHA:
         self.ai_reply = ai_reply
         self.prompts = []
 
+    def find_immich(self):
+        return list(getattr(self, "discovered", []))
+
     def core_config(self):
         return {"latitude": HOME[0], "longitude": HOME[1], "country": "GB"}
 
