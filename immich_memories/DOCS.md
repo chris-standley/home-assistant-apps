@@ -87,8 +87,10 @@ two days are left until the next run, in case they're still going on.
 
 **Choosing photos**
 
-Near-identical photos (bursts, Immich's duplicate detection, or shots taken a
-minute apart that look the same) are grouped. In each group the app looks at
+Near-identical photos are grouped: bursts, Immich's duplicate detection, and
+shots taken within a few minutes that look alike. "Look alike" compares each
+photo's colours, where things sit in the frame and fine detail, so the same
+shot reframed, zoomed a little or a touch brighter still counts. In each group the app looks at
 Immich's preview of every shot and picks the best:
 
 1. **People:** faces are found with OpenCV's YuNet face detector. For each face
@@ -105,7 +107,21 @@ photo on top, so the timeline shows only the best one.
 Then each moment is scored, favouring favourites, named people, people facing
 the camera, scenery, landmarks and sunsets (smart search), and sharp,
 well-exposed photos. The album gets a spread of the best across the whole event
-(up to *Most photos per album*), and the best one becomes its cover.
+(about 4×√photos, up to *Most photos per album*), and the best one becomes its
+cover. It won't take two photos of the same scene from around the same time,
+even when they weren't similar enough to stack, so ten shots of one view give
+one photo.
+
+**Similar photo filtering** sets how hard it looks for repeats:
+
+| Setting | Stacks alike shots taken within | One photo of a scene per |
+| --- | --- | --- |
+| Light | 90 seconds (near-identical only) | 15 minutes |
+| Normal | 5 minutes | 45 minutes |
+| Strong | 15 minutes | 2 hours |
+
+Albums already made aren't changed. To rebuild them with new settings, turn on
+**Remove created albums**, restart, then turn it off and restart again.
 
 **Names**
 
@@ -166,6 +182,7 @@ made again. Turn **Collections** off to stop making and topping them up.
 | AI Task entity | *(default)* | Which AI Task entity to use; `none` to skip AI Task. |
 | Conversation agent | | A conversation agent to use if AI Task isn't available. |
 | Stack similar photos | on | Stack near-identical shots with the best on top. |
+| Similar photo filtering | normal | `light`, `normal` or `strong` (see Choosing photos). |
 | Most photos per album | `50` | Albums get about 4×√(photos) photos, up to this. |
 | Most new albums per run | `20` | Spreads a big first run over several days. `0` = no limit. |
 | Photos needed for a trip or day out | `15` | |

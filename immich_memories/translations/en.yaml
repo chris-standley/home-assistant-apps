@@ -48,6 +48,12 @@ configuration:
     description: >-
       Stack near-identical shots in Immich, with the best one (most people looking at the camera with eyes open,
       sharpest) on top.
+  similar_photos:
+    name: Similar photo filtering
+    description: >-
+      How hard to look for repeats. Normal stacks shots of the same thing taken within 5 minutes and keeps one
+      photo of a scene per 45 minutes in an album. Strong stacks within 15 minutes and keeps one per 2 hours of
+      similar-looking photos. Light only catches near-identical shots taken within 90 seconds.
   max_photos_per_album:
     name: Most photos per album
   max_albums_per_run:

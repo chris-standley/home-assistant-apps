@@ -7,7 +7,7 @@ import bisect
 import math
 from dataclasses import dataclass
 
-from .analysis import Analysis, hamming
+from .analysis import Analysis, similarity
 from .immich import Photo
 from .labels import LabelIndex
 
@@ -24,15 +24,32 @@ class Group:
         return [p for p in self.photos if p.id != self.best.id]
 
 
+@dataclass(frozen=True)
+class Strictness:
+    """How hard to look for repeats. Similarity is analysis.similarity()."""
+
+    stack_seconds: float  # near-identical shots must be this close in time...
+    stack_similarity: float  # ...and at least this alike to be stacked
+    scene_seconds: float  # an album won't hold two photos this close in time...
+    scene_similarity: float  # ...that are at least this alike
+
+
+STRICTNESS = {
+    "light": Strictness(90, 0.85, 15 * 60, 0.75),
+    "normal": Strictness(5 * 60, 0.75, 45 * 60, 0.62),
+    "strong": Strictness(15 * 60, 0.68, 2 * 3600, 0.55),
+}
+BURST_SECONDS = 2
+
+
 def group_similar(
     photos: list[Photo],
     analyses: dict[str, Analysis],
-    burst_seconds: float = 2,
-    similar_seconds: float = 90,
-    max_hash_distance: int = 10,
+    strictness: Strictness = STRICTNESS["normal"],
 ) -> list[list[Photo]]:
-    """Group burst shots and near-duplicates (Immich's duplicate detection, or
-    similar-looking photos taken within a minute or two of each other)."""
+    """Group burst shots and near-duplicates: Immich's duplicate detection,
+    shots a second or two apart, and photos taken within a few minutes that
+    look alike (similar colours and layout, see analysis.similarity)."""
     ordered = sorted(photos, key=lambda p: p.utc_dt)
     parent = {p.id: p.id for p in ordered}
 
@@ -48,7 +65,7 @@ def group_similar(
     by_dup: dict[str, str] = {}
     for p in ordered:
         if p.stack_id:
-            continue  # already in a stack the user made; leave it alone
+            continue  # already in a stack; leave it alone
         if p.duplicate_id:
             if p.duplicate_id in by_dup:
                 union(p.id, by_dup[p.duplicate_id])
@@ -58,15 +75,20 @@ def group_similar(
     for i, p in enumerate(ordered):
         if p.stack_id:
             continue
-        for q in reversed(ordered[max(0, i - 6) : i]):
+        ap = analyses.get(p.id)
+        for q in reversed(ordered[max(0, i - 40) : i]):
             if q.stack_id:
                 continue
             dt = (p.utc_dt - q.utc_dt).total_seconds()
-            if dt > similar_seconds:
+            if dt > strictness.stack_seconds:
                 break
-            ap, aq = analyses.get(p.id), analyses.get(q.id)
-            close_look = ap and aq and hamming(ap.dhash, aq.dhash) <= max_hash_distance
-            if (dt <= burst_seconds and (not ap or not aq or hamming(ap.dhash, aq.dhash) <= 20)) or close_look:
+            aq = analyses.get(q.id)
+            if not ap or not aq:
+                if dt <= BURST_SECONDS:
+                    union(p.id, q.id)
+                continue
+            sim = similarity(ap, aq)
+            if (dt <= BURST_SECONDS and sim >= 0.5) or sim >= strictness.stack_similarity:
                 union(p.id, q.id)
 
     groups: dict[str, list[Photo]] = {}
@@ -113,8 +135,8 @@ def pick_best(photos: list[Photo], analyses: dict[str, Analysis]) -> Photo:
     return max(photos, key=score)
 
 
-def make_groups(photos: list[Photo], analyses: dict[str, Analysis]) -> list[Group]:
-    return [Group(g, pick_best(g, analyses)) for g in group_similar(photos, analyses)]
+def make_groups(photos: list[Photo], analyses: dict[str, Analysis], strictness: Strictness = STRICTNESS["normal"]) -> list[Group]:
+    return [Group(g, pick_best(g, analyses)) for g in group_similar(photos, analyses, strictness)]
 
 
 def score_photos(groups: list[Group], analyses: dict[str, Analysis], labels: LabelIndex) -> dict[str, float]:
@@ -156,29 +178,53 @@ def target_size(candidates: int, max_photos: int, min_photos: int = 8) -> int:
     return max(min(candidates, min_photos), min(max_photos, round(4 * math.sqrt(candidates))))
 
 
-def select(groups: list[Group], scores: dict[str, float], max_photos: int) -> list[Photo]:
-    """A spread of the best photos across the event.
+def select(
+    groups: list[Group],
+    scores: dict[str, float],
+    max_photos: int,
+    analyses: dict[str, Analysis] | None = None,
+    strictness: Strictness = STRICTNESS["normal"],
+) -> list[Photo]:
+    """A spread of the best photos across the event, without repeats.
 
     Most picks come from splitting the event into equal slices by time and
     taking the best of each, so a long day isn't all one hour; the rest go to
-    the highest scores overall.
+    the highest scores overall. A photo is skipped if the album already has
+    one taken around the same time that looks like it (the same scene from a
+    slightly different angle, say), so a run of similar shots gives one photo.
     """
+    analyses = analyses or {}
     reps = sorted((g.best for g in groups), key=lambda p: p.local_dt)
     n = target_size(len(reps), max_photos)
-    if n >= len(reps):
-        return reps
     chosen: dict[str, Photo] = {}
+
+    def repeats(p: Photo) -> bool:
+        a = analyses.get(p.id)
+        if not a:
+            return False
+        for c in chosen.values():
+            b = analyses.get(c.id)
+            if not b or abs((p.utc_dt - c.utc_dt).total_seconds()) > strictness.scene_seconds:
+                continue
+            if similarity(a, b) >= strictness.scene_similarity:
+                return True
+        return False
+
+    def best_first(ps):
+        return sorted(ps, key=lambda p: scores.get(p.id, 0), reverse=True)
+
     buckets = max(1, round(n * 0.7))
     size = len(reps) / buckets
     for b in range(buckets):
-        chunk = reps[int(b * size) : int((b + 1) * size)]
-        if chunk:
-            best = max(chunk, key=lambda p: scores.get(p.id, 0))
-            chosen[best.id] = best
-    for p in sorted(reps, key=lambda p: scores.get(p.id, 0), reverse=True):
+        for p in best_first(reps[int(b * size) : int((b + 1) * size)]):
+            if not repeats(p):
+                chosen[p.id] = p
+                break
+    for p in best_first(reps):
         if len(chosen) >= n:
             break
-        chosen.setdefault(p.id, p)
+        if p.id not in chosen and not repeats(p):
+            chosen[p.id] = p
     return sorted(chosen.values(), key=lambda p: p.local_dt)
 
 

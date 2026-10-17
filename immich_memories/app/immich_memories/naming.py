@@ -193,7 +193,7 @@ def template_name(event: Event, facts: Facts) -> str:
     # A burst of photos on an ordinary day.
     for tag, phrase in (
         ("wedding", "Wedding"),
-        ("birthday", "Birthday party"),
+        ("party", "Party"),
         ("concert", "Concert"),
         ("christmas", "Christmas"),
         ("snow", "Snow day"),
@@ -213,11 +213,12 @@ def template_name(event: Event, facts: Facts) -> str:
 AI_PROMPT = """You write short, warm titles for photo memories, like the memories in Apple Photos.
 
 Examples of the style: "Mediterranean cruise 2024", "Walk in the Lake District with Emma", "Christmas 2023", \
-"Weekend in Paris", "Jack's 5th birthday", "Beach day at Woolacombe".
+"Weekend in Paris", "Beach day at Woolacombe".
 
 Write one title for this memory using only these facts. Use a well-known name for the area if the towns \
 clearly belong to one (for example a national park, island or coast). Mention people only if they are listed. \
-Don't invent activities that the facts don't suggest. Keep it under 45 characters. Reply with the title only, \
+Don't invent activities that the facts don't suggest. Only call it someone's birthday if "Birthday of" is \
+listed below; a party or a cake on another day is not a birthday. Keep it under 45 characters. Reply with the title only, \
 no quotes or punctuation at the end.
 
 Facts:
@@ -255,6 +256,13 @@ def ai_facts(event: Event, facts: Facts, template: str, home: str | None) -> str
     return "\n".join(lines)
 
 
+def _wrong_birthday(title: str, event: Event) -> bool:
+    """An AI title calling this someone's birthday when it isn't."""
+    if not re.search(r"birthday", title, re.IGNORECASE):
+        return False
+    return not (event.kind == "birthday" and event.person and event.person.lower() in title.lower())
+
+
 def clean_ai_title(text: str | None) -> str | None:
     if not text:
         return None
@@ -273,6 +281,9 @@ def name_event(event: Event, facts: Facts, ai=None, home: str | None = None) -> 
     template = template_name(event, facts)
     if ai is not None:
         title = clean_ai_title(ai(AI_PROMPT.format(facts=ai_facts(event, facts, template, home))))
+        if title and _wrong_birthday(title, event):
+            log.info("Ignoring AI title %r: it isn't anyone's birthday that day", title)
+            title = None
         if title:
             return title, "ai"
     return template, "template"
