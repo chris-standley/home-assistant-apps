@@ -156,7 +156,7 @@ kind of memory and grow each year:
 
 | Collection | Gathers |
 | --- | --- |
-| *Christmas through the years* (and Easter, Halloween, New Year's Eve...) | Every year's memory of that holiday, including trips over it. |
+| *Christmas through the years* (and Easter, Halloween, New Year's Eve...) | Every year's memory of that holiday, including trips over it, plus any memory whose name mentions it (Christmas, Xmas, festive, Santa, carols...). |
 | *Jack's birthdays* | Every birthday memory for that person. |
 | *Holidays in Norway* | Every trip spent mostly in a country other than your home country. |
 | *Trips to the Lake District* | Trips and days out in the same area in your home country (their photos centre within about 30 km of each other). The AI names the area from the towns visited; without AI it's *Trips to* the most visited town. |

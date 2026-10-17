@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3
+
+- *Christmas through the years* now also gathers any memory whose name says
+  Christmas, Xmas, festive, Santa, carols and the like, not just memories made
+  over the Christmas holiday itself. The other seasons (Easter, Halloween, New
+  Year's Eve...) match their names the same way.
+
 ## 0.1.2
 
 - Fewer similar photos. Similar shots are now matched by their colours and

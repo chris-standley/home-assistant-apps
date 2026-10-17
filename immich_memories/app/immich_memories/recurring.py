@@ -1,7 +1,8 @@
 """Collections: albums that gather a recurring kind of memory and grow each year.
 
 - Seasons: *Christmas through the years*, *Easter through the years*... from
-  every holiday memory (and trips over that holiday).
+  every holiday memory (and trips over that holiday), plus any memory whose
+  name mentions the season ("Festive lights in York", "Xmas market").
 - Birthdays: *Jack's birthdays*.
 - Countries: *Holidays in Norway*, from every trip mostly spent in a country
   other than home.
@@ -31,6 +32,25 @@ log = logging.getLogger(__name__)
 
 PLACE_RADIUS_KM = 30
 SEASONS = {"Christmas", "Easter", "Halloween", "New Year's Eve", "Bonfire Night", "Mother's Day", "Father's Day"}
+# Words in a memory's name that put it in a season's collection.
+SEASON_WORDS = {
+    "Christmas": r"christmas|x-?mas|festive|yule(tide)?|advent|santa|nativity|carol(s|ling)?|boxing day|christmas eve",
+    "Easter": r"easter",
+    "Halloween": r"hallowe'?en|trick or treat",
+    "New Year's Eve": r"new year'?s? eve|hogmanay",
+    "Bonfire Night": r"bonfire night|guy fawkes",
+    "Mother's Day": r"mother'?s day|mothering sunday",
+    "Father's Day": r"father'?s day",
+}
+_SEASON_RE = {season: re.compile(rf"\b({words})\b", re.I) for season, words in SEASON_WORDS.items()}
+
+
+def season_of(record: dict) -> str | None:
+    """The season a memory belongs to: its holiday, or a season its name mentions."""
+    if record.get("holiday") in SEASONS:
+        return record["holiday"]
+    name = record.get("name") or ""
+    return next((season for season, rx in _SEASON_RE.items() if rx.search(name)), None)
 
 
 @dataclass
@@ -63,9 +83,9 @@ def plan(state: State, home_country: str | None, min_members: int = 2) -> list[C
     countries: dict[str, list[str]] = {}
     places: list[tuple[str, dict]] = []
     for key, r in sorted(events.items(), key=lambda kv: kv[1]["start"]):
-        holiday = r.get("holiday")
-        if holiday in SEASONS:
-            seasons.setdefault(holiday, []).append(key)
+        season = season_of(r)
+        if season:
+            seasons.setdefault(season, []).append(key)
         if r.get("kind") == "birthday" and r.get("person"):
             birthdays.setdefault(r["person"], []).append(key)
         if r.get("kind") == "trip" and r.get("country") and r["country"] != home_country:

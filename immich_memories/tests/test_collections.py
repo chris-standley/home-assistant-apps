@@ -89,3 +89,24 @@ def test_place_fallback_name_without_ai(tmp_path):
     immich = FakeImmich(library())
     run(Options(immich_api_key="x"), FakeHA(), data_dir=str(tmp_path), today=date(2024, 1, 10), immich=immich)
     assert "Trips to Ambleside" in {a["name"] for a in immich.albums_made}
+
+
+def test_festive_names_join_the_christmas_collection(tmp_path):
+    from immich_memories.recurring import plan, season_of
+    from immich_memories.state import State
+
+    assert season_of({"name": "Festive lights in York"}) == "Christmas"
+    assert season_of({"name": "Xmas market in Manchester"}) == "Christmas"
+    assert season_of({"name": "Christmas Day with Emma", "holiday": "Christmas"}) == "Christmas"
+    assert season_of({"name": "Walk in the Lake District with Emma"}) is None
+
+    state = State(str(tmp_path / "state.json"))
+    for key, name, start, holiday in [
+        ("a", "Christmas 2022", "2022-12-25", "Christmas"),
+        ("b", "Festive lights in York", "2023-12-02", None),
+        ("c", "Xmas market in Manchester", "2024-11-30", None),
+        ("d", "Day out in Whitby", "2023-12-10", None),
+    ]:
+        state.record(key, status="created", name=name, kind="day_out", start=start, end=start, holiday=holiday, highlights=["x"])
+    xmas = next(c for c in plan(state, "United Kingdom") if c.name == "Christmas through the years")
+    assert xmas.members == ["a", "b", "c"]
