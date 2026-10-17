@@ -1,7 +1,7 @@
 # Home Assistant app configuration for Immich Memories
 # Docs: https://developers.home-assistant.io/docs/apps/configuration
 name: Immich Memories
-version: "0.1.1"
+version: "0.1.2"
 slug: immich_memories
 description: >-
   Apple Photos style memories for Immich. Finds trips, days out, holidays,
@@ -33,6 +33,7 @@ options:
   dry_run: false
   ai_names: true
   create_stacks: true
+  similar_photos: normal
   max_photos_per_album: 50
   max_albums_per_run: 20
   min_photos_trip: 15
@@ -57,6 +58,7 @@ schema:
   ai_task_entity: str?
   conversation_agent: str?
   create_stacks: bool
+  similar_photos: list(light|normal|strong)
   max_photos_per_album: int(5,500)
   max_albums_per_run: int(0,1000)
   min_photos_trip: int(3,1000)

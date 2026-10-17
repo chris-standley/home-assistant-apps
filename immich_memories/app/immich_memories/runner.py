@@ -10,7 +10,7 @@ from datetime import date, datetime
 
 from .analysis import AnalysisCache, Analyzer, analyse_photos
 from .clutter import clutter_reason
-from .curate import make_groups, pick_cover, score_photos, select
+from .curate import STRICTNESS, make_groups, pick_cover, score_photos, select
 from .events import DetectSettings, detect_events, guess_home, haversine_km
 from .homeassistant import HomeAssistant
 from .immich import Immich, ImmichError, pin_host
@@ -33,6 +33,7 @@ class Options:
     ai_task_entity: str = ""
     conversation_agent: str = ""
     create_stacks: bool = True
+    similar_photos: str = "normal"
     max_photos_per_album: int = 50
     max_albums_per_run: int = 20
     min_photos_trip: int = 15
@@ -210,14 +211,15 @@ def run(opts: Options, ha: HomeAssistant, data_dir: str = "/data", today: date |
         return text
 
     used_names = {a.get("albumName") for a in immich.albums()}
+    strictness = STRICTNESS.get(opts.similar_photos, STRICTNESS["normal"])
     made = []
     for event in new:
         ids = [p.id for p in event.photos]
         event.tags = labels.scene_tags(ids)
         analyses = analyse_photos(event.photos, immich.preview, cache, analyzer)
-        groups = make_groups(event.photos, analyses)
+        groups = make_groups(event.photos, analyses, strictness)
         scores = score_photos(groups, analyses, labels)
-        chosen = select(groups, scores, opts.max_photos_per_album)
+        chosen = select(groups, scores, opts.max_photos_per_album, analyses, strictness)
         cover = pick_cover(chosen, scores, analyses, labels)
         facts = gather_facts(event, exclude, home_country=None)
         name, how = name_event(event, facts, ai=ai, home=home_city)

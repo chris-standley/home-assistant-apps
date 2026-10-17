@@ -9,7 +9,9 @@ For each photo this measures:
   it is turned towards the camera (from the eye and nose landmarks), whether
   its eyes are open (OpenCV's eye cascade finds open eyes far more readily
   than closed ones), and whether it is smiling;
-- a 64-bit difference hash, used to find near-identical shots.
+- what the photo looks like, for finding similar shots: a colour histogram
+  (robust to small changes of framing), a 4x4 grid of average colours (where
+  things are in the frame) and a 64-bit difference hash (fine detail).
 
 Results are cached in SQLite by asset id and checksum, so each photo is
 downloaded and analysed once.
@@ -34,7 +36,7 @@ log = logging.getLogger(__name__)
 YUNET_MODEL = os.environ.get(
     "YUNET_MODEL", os.path.join(os.path.dirname(__file__), "models", "face_detection_yunet_2023mar.onnx")
 )
-ANALYSIS_VERSION = 1
+ANALYSIS_VERSION = 2  # 2: colour histogram and colour layout for similarity
 MAX_SIDE = 1440  # Immich's preview size; larger images are scaled down to this
 
 
@@ -58,6 +60,8 @@ class Analysis:
     exposure: float  # 1 = well exposed, 0 = badly over/under exposed
     dhash: int
     faces: list[Face] = field(default_factory=list)
+    hist: list[float] = field(default_factory=list)  # 12 hue x 4 saturation bins, sums to 1
+    layout: list[int] = field(default_factory=list)  # 4x4 grid of mean Lab colours
 
     @property
     def face_sharpness(self) -> float | None:
@@ -100,6 +104,32 @@ def hamming(a: int, b: int) -> int:
     return bin(a ^ b).count("1")
 
 
+def _hist(img: np.ndarray) -> list[float]:
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    h = cv2.calcHist([hsv], [0, 1], None, [12, 4], [0, 180, 0, 256]).flatten()
+    total = float(h.sum()) or 1.0
+    return [round(float(x) / total, 4) for x in h]
+
+
+def _layout(img: np.ndarray) -> list[int]:
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    return [int(x) for x in cv2.resize(lab, (4, 4), interpolation=cv2.INTER_AREA).flatten()]
+
+
+def similarity(a: Analysis, b: Analysis) -> float:
+    """How alike two photos look, 0 (nothing alike) to 1 (the same picture).
+
+    Reframing the same shot slightly scores about 0.75-0.95, the same scene
+    from a different angle about 0.6-0.7, different scenes under about 0.35.
+    """
+    hash_sim = max(0.0, 1 - hamming(a.dhash, b.dhash) / 32)
+    if not a.hist or not b.hist:
+        return hash_sim
+    hist_sim = sum(min(x, y) for x, y in zip(a.hist, b.hist))
+    layout_sim = max(0.0, 1 - sum(abs(x - y) for x, y in zip(a.layout, b.layout)) / len(a.layout) / 40)
+    return 0.45 * hist_sim + 0.35 * layout_sim + 0.2 * hash_sim
+
+
 class Analyzer:
     def __init__(self, model_path: str = YUNET_MODEL):
         self.model_path = model_path
@@ -137,6 +167,8 @@ class Analyzer:
             exposure=round(exposure, 3),
             dhash=_dhash(gray),
             faces=self._faces(img, gray),
+            hist=_hist(img),
+            layout=_layout(img),
         )
 
     def _faces(self, img: np.ndarray, gray: np.ndarray) -> list[Face]:

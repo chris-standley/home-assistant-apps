@@ -54,7 +54,7 @@ LABELS = [
     Label("theme_park", "rides at a theme park", 0.01, "scene"),
     Label("zoo", "animals at a zoo or safari park", 0.01, "scene"),
     Label("wedding", "a wedding with a bride and groom", 0.01, "scene"),
-    Label("birthday", "a birthday party with a cake and candles", 0.01, "scene"),
+    Label("party", "a party with a cake and candles", 0.01, "scene"),
     Label("christmas", "a Christmas tree, decorations and presents", 0.01, "scene"),
     Label("concert", "a live concert or festival stage", 0.01, "scene"),
     Label("camping", "camping with a tent", 0.01, "scene"),
