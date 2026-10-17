@@ -1,7 +1,7 @@
 # Home Assistant app configuration for Immich Memories
 # Docs: https://developers.home-assistant.io/docs/apps/configuration
 name: Immich Memories
-version: "0.1.0"
+version: "0.1.1"
 slug: immich_memories
 description: >-
   Apple Photos style memories for Immich. Finds trips, days out, holidays,
@@ -27,6 +27,7 @@ homeassistant_api: true
 
 options:
   immich_api_key: ""
+  verify_ssl: true
   run_time: "03:30"
   run_on_start: true
   dry_run: false
@@ -46,6 +47,8 @@ options:
   log_level: info
 schema:
   immich_url: url?
+  immich_ip: match(^[0-9a-fA-F:.]+$)?
+  verify_ssl: bool
   immich_api_key: password
   run_time: match(^([01]?[0-9]|2[0-3]):[0-5][0-9]$)
   run_on_start: bool

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from urllib.parse import urlparse
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -12,7 +13,7 @@ from .clutter import clutter_reason
 from .curate import make_groups, pick_cover, score_photos, select
 from .events import DetectSettings, detect_events, guess_home, haversine_km
 from .homeassistant import HomeAssistant
-from .immich import Immich, ImmichError
+from .immich import Immich, ImmichError, pin_host
 from .labels import LabelIndex
 from .naming import describe, gather_facts, name_event
 from .recurring import summarise_event, update as update_collections
@@ -24,6 +25,8 @@ log = logging.getLogger(__name__)
 @dataclass
 class Options:
     immich_url: str = ""
+    immich_ip: str = ""
+    verify_ssl: bool = True
     immich_api_key: str = ""
     dry_run: bool = False
     ai_names: bool = True
@@ -52,14 +55,23 @@ class Options:
 
 
 def connect(opts: Options, ha: HomeAssistant) -> Immich:
-    candidates = [opts.immich_url] if opts.immich_url else ha.find_immich()
+    candidates = []
+    if opts.immich_url:
+        candidates.append(opts.immich_url)
+        host = urlparse(opts.immich_url if "://" in opts.immich_url else f"http://{opts.immich_url}").hostname
+        if opts.immich_ip and host:
+            pin_host(host, opts.immich_ip)
+            log.info("Connecting to %s at %s", host, opts.immich_ip)
+    # The Immich app on this Home Assistant, directly: also the fallback when
+    # the configured URL can't be reached from inside Home Assistant.
+    candidates += [u for u in ha.find_immich() if u not in candidates]
     if not candidates:
         raise SystemExit(
             "Couldn't find an Immich app on this Home Assistant. Set 'Immich URL' in this app's configuration."
         )
     errors = []
     for url in candidates:
-        client = Immich(url, opts.immich_api_key, timeout=15)
+        client = Immich(url, opts.immich_api_key, timeout=15, verify=opts.verify_ssl)
         try:
             version = client.version()
         except ImmichError as err:
@@ -71,6 +83,8 @@ def connect(opts: Options, ha: HomeAssistant) -> Immich:
             raise SystemExit(f"Immich at {url} rejected the API key: {err}") from err
         client.timeout = 120
         log.info("Connected to Immich %s at %s", version, url)
+        if opts.immich_url and url != opts.immich_url:
+            log.warning("Couldn't use %s, so connected to the Immich app directly instead", opts.immich_url)
         return client
     raise SystemExit("Couldn't reach Immich. Tried:\n  " + "\n  ".join(errors))
 

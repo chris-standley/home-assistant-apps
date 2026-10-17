@@ -31,9 +31,35 @@ are never modified or moved; the app only creates albums and stacks.
 ### Finding Immich
 
 Leave **Immich URL** empty and the app looks for an Immich app on this Home
-Assistant and connects to it directly. If it can't find it (the log says
-so), enter Immich's address, for example `http://homeassistant.local:2283`, or
-the app's hostname from its **Info** page, e.g. `http://abc123-immich:2283`.
+Assistant and connects to it directly, over Home Assistant's internal network
+(no DNS or certificates involved). This is the most reliable option. If it
+can't find it (the log says so), enter Immich's address, for example
+`http://homeassistant.local:2283`, or the app's hostname from its **Info**
+page, e.g. `http://abc123-immich:2283`. If the URL you enter can't be reached,
+the app falls back to the Immich app it found.
+
+### Connection problems
+
+The log says why a connection failed:
+
+- **"the hostname couldn't be looked up"**: apps use Home Assistant's own DNS,
+  which may not know names that only your router or Pi-hole/AdGuard knows.
+  Either:
+  - leave **Immich URL** empty (see above), or
+  - set **Immich IP address** to Immich's IP (e.g. `192.168.1.20`) and keep the
+    hostname in **Immich URL**. The app connects to that IP but still checks
+    the certificate against the hostname, like `curl --resolve`, or
+  - fix Home Assistant's DNS: in the **Terminal & SSH** app run `ha dns info`;
+    `ha dns options --servers dns://192.168.1.1` points it at your router (use
+    your router or Pi-hole's IP), and `ha dns options --fallback=false` stops it
+    falling back to public DNS, which doesn't know local names.
+- **"its HTTPS certificate wasn't accepted"**: usually because the URL uses an
+  IP address but the certificate is for a hostname. Use the hostname plus
+  **Immich IP address** as above. For a self-signed certificate, turn off
+  **Verify HTTPS certificate**: the connection is still encrypted, but the app
+  can't confirm it's your Immich.
+- **"nothing answered at that address and port"**: check the port. Immich
+  listens on `2283` (older versions `3001`).
 
 ## How it decides
 
@@ -130,6 +156,8 @@ made again. Turn **Collections** off to stop making and topping them up.
 | Option | Default | What it does |
 | --- | --- | --- |
 | Immich URL | *(find it)* | Immich's address, if it can't be found automatically. |
+| Immich IP address | | Connect to this IP for the URL's hostname (see Connection problems). |
+| Verify HTTPS certificate | on | Turn off for self-signed certificates. |
 | Immich API key | | Required. See Setup. |
 | Daily run time | `03:30` | When to look for new memories, in Home Assistant's time zone. |
 | Run when started | on | Also run as soon as the app starts. |

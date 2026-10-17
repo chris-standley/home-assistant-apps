@@ -7,12 +7,14 @@ Written against Immich v1.120+ through v3.x. Search pagination switched from
 from __future__ import annotations
 
 import logging
+import socket
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Iterator
 
 import requests
+import urllib3
 
 log = logging.getLogger(__name__)
 
@@ -126,13 +128,58 @@ def photo_from_asset(a: dict[str, Any]) -> Photo | None:
     )
 
 
+_pinned: dict[str, str] = {}
+_real_getaddrinfo = socket.getaddrinfo
+
+
+def _getaddrinfo(host, *args, **kwargs):
+    return _real_getaddrinfo(_pinned.get(host, host), *args, **kwargs)
+
+
+def pin_host(hostname: str, ip: str) -> None:
+    """Connect to `ip` whenever `hostname` is looked up, like curl's --resolve.
+
+    For an Immich address Home Assistant's DNS can't look up: requests still
+    sends the hostname for HTTPS (SNI) and checks the certificate against it,
+    so certificate checks keep working.
+    """
+    _pinned[hostname] = ip
+    socket.getaddrinfo = _getaddrinfo
+
+
+def describe_error(err: Exception) -> str:
+    """A plain-English reason a request to Immich failed, with what to try."""
+    text = str(err)
+    if isinstance(err, requests.exceptions.SSLError) or "CERTIFICATE_VERIFY_FAILED" in text:
+        return (
+            "its HTTPS certificate wasn't accepted. If you connect by IP address, set 'Immich IP address' and keep "
+            "the hostname in 'Immich URL' instead; for a self-signed certificate, turn off 'Verify HTTPS certificate'"
+        )
+    if "Name or service not known" in text or "Temporary failure in name resolution" in text or "NameResolutionError" in text or "getaddrinfo failed" in text:
+        return (
+            "the hostname couldn't be looked up from inside Home Assistant. Set 'Immich IP address' to Immich's IP, "
+            "or leave 'Immich URL' empty to use the Immich app directly"
+        )
+    if isinstance(err, requests.exceptions.ConnectTimeout) or "timed out" in text:
+        return "the connection timed out"
+    if isinstance(err, requests.exceptions.ConnectionError):
+        return "nothing answered at that address and port"
+    return text[:300]
+
+
 class Immich:
-    def __init__(self, url: str, api_key: str, timeout: float = 60):
+    def __init__(self, url: str, api_key: str, timeout: float = 60, verify: bool = True):
+        url = url.strip()
+        if "://" not in url:
+            url = "http://" + url
         self.base = url.rstrip("/")
         if not self.base.endswith("/api"):
             self.base += "/api"
         self.session = requests.Session()
         self.session.headers.update({"x-api-key": api_key, "Accept": "application/json"})
+        self.session.verify = verify
+        if not verify:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.timeout = timeout
 
     # -- plumbing ---------------------------------------------------------
@@ -141,10 +188,15 @@ class Immich:
         url = f"{self.base}{path}"
         for attempt in range(4):
             try:
-                resp = self.session.request(method, url, timeout=self.timeout, **kwargs)
+                # verify is passed per request: a session-level False is overridden by
+                # REQUESTS_CA_BUNDLE if that's set (a requests quirk).
+                resp = self.session.request(method, url, timeout=self.timeout, verify=self.session.verify, **kwargs)
             except requests.RequestException as err:
-                if attempt == 3:
-                    raise ImmichError(f"{method} {path}: {err}") from err
+                # DNS and certificate errors won't fix themselves; don't retry them.
+                permanent = isinstance(err, requests.exceptions.SSLError) or "resolution" in str(err).lower() \
+                    or "not known" in str(err)
+                if attempt == 3 or permanent:
+                    raise ImmichError(f"{method} {path}: {describe_error(err)}") from err
                 time.sleep(2**attempt)
                 continue
             if resp.status_code >= 500 and attempt < 3:
