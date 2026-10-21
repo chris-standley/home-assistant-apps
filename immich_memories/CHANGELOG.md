@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 — 2026-10-21
+
+- Updated the base image to a new upstream build (tracks the `3.13-slim` tag).
+  This refreshes the bundled runtime (ffmpeg / OS / GPU libraries).
+  Pinned digest: `sha256:cf50a4f6ac4f026458b08d5222023d700ac806410dff5e9ca8728fa44f2b850f`
+
+
 ## 0.1.2
 
 - Fewer similar photos. Similar shots are now matched by their colours and
