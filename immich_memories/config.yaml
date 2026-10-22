@@ -1,7 +1,7 @@
 # Home Assistant app configuration for Immich Memories
 # Docs: https://developers.home-assistant.io/docs/apps/configuration
 name: Immich Memories
-version: "0.1.3"
+version: "0.1.4"
 slug: immich_memories
 description: >-
   Apple Photos style memories for Immich. Finds trips, days out, holidays,
