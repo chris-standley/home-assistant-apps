@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4 — 2026-10-23
+
+- Updated the base image to a new upstream build (tracks the `latest` tag).
+  This refreshes the bundled runtime (ffmpeg / OS / GPU libraries).
+  Pinned digest: `sha256:2038fe038ab3876a80f6e7b7e0aef6607b032c7dc0c9b3ad3296d0b2eba3bbb5`
+
+
 ## 1.0.3 — 2026-10-06
 
 - Updated the base image to a new upstream build (tracks the `latest` tag).
