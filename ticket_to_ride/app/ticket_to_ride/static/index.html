@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Ticket to Ride">
+  <meta name="theme-color" content="#7a2e1d">
+  <title>Ticket to Ride Scorer</title>
+  <link rel="icon" href="static/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="static/icon.svg">
+  <link rel="manifest" href="static/manifest.json">
+  <link rel="stylesheet" href="static/app.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Ticket to Ride <span>Scorer</span></h1>
+    <nav class="steps" id="steps">
+      <button data-step="players">Players</button>
+      <button data-step="board">Board</button>
+      <button data-step="tickets">Tickets</button>
+      <button data-step="scores">Scores</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="step-players" class="step">
+      <h2>Map</h2>
+      <div id="map-choice" class="choice"></div>
+      <h2>Who played?</h2>
+      <p class="hint">Tick each colour in the game. Names are optional.</p>
+      <div id="player-list" class="players"></div>
+      <div class="actions">
+        <button class="primary" data-goto="board">Next: the board</button>
+      </div>
+    </section>
+
+    <section id="step-board" class="step">
+      <div class="photo-row ai-only">
+        <label class="primary file">
+          <input type="file" accept="image/*" id="board-photo">
+          Photograph the board
+        </label>
+      </div>
+      <p class="hint" id="board-hint"></p>
+      <div class="palette" id="palette"></div>
+      <div class="map-wrap" id="map-wrap">
+        <div class="zoom">
+          <button id="zoom-out" aria-label="Zoom out">−</button>
+          <button id="zoom-in" aria-label="Zoom in">+</button>
+        </div>
+        <div class="map-scroll" id="map-scroll"><svg id="map" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      </div>
+      <div id="train-counts" class="counts"></div>
+      <div class="actions">
+        <button class="ghost" id="clear-board">Clear board</button>
+        <button class="primary" data-goto="tickets">Next: tickets</button>
+      </div>
+    </section>
+
+    <section id="step-tickets" class="step">
+      <div class="tabs" id="ticket-tabs"></div>
+      <div class="photo-row ai-only">
+        <label class="primary file">
+          <input type="file" accept="image/*" id="ticket-photo">
+          <span id="ticket-photo-label">Photograph tickets</span>
+        </label>
+      </div>
+      <p class="hint ai-only">Lay the player's tickets face up, completed and not, and take one photo.</p>
+      <ul class="tickets" id="ticket-list"></ul>
+      <div class="add-ticket">
+        <select id="ticket-select"></select>
+        <div class="custom-ticket" id="custom-ticket" hidden>
+          <select id="custom-a"></select>
+          <select id="custom-b"></select>
+          <input type="number" id="custom-points" min="0" max="40" placeholder="Pts" inputmode="numeric">
+          <button id="custom-add">Add</button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" data-goto="scores">See scores</button>
+      </div>
+    </section>
+
+    <section id="step-scores" class="step">
+      <ul class="warnings" id="warnings"></ul>
+      <ol class="scores" id="score-list"></ol>
+      <div class="actions">
+        <button class="ghost" id="new-game">New game</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="busy" id="busy" hidden>
+    <div class="busy-box"><div class="spinner"></div><p id="busy-text">Reading…</p></div>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="static/scoring.js"></script>
+  <script src="static/app.js"></script>
+</body>
+</html>

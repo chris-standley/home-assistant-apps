@@ -41,6 +41,17 @@ project does **not** modify or redistribute the upstream software itself.
   Immich's public API; it does not package or modify Immich. It uses OpenCV's
   YuNet face detection model (MIT licence), downloaded when the app is built.
 
+## Ticket to Ride Scorer app
+
+- Not affiliated with, endorsed by, or supported by **Days of Wonder** or
+  **Asmodee**.
+- "Ticket to Ride" is a trademark of Days of Wonder, used only to describe the
+  game this app helps score. No trademark ownership or endorsement is claimed or
+  implied.
+- This app is original code. It doesn't include artwork from the game: its map
+  is a simple diagram of city names and route lengths, used to add up scores.
+  You need your own copy of the game to play.
+
 ## General
 
 - This project is not affiliated with or endorsed by Home Assistant / the Open

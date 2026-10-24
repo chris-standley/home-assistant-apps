@@ -1,0 +1,9 @@
+configuration:
+  ai_task_entity:
+    name: AI Task entity
+    description: >-
+      The AI that reads photos, e.g. ai_task.claude_ai_task. It must be able to see images. Leave empty for Home
+      Assistant's default AI Task entity.
+  log_level:
+    name: Log level
+    description: Debug also logs what the AI answered for each photo.

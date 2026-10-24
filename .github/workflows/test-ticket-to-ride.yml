@@ -1,0 +1,52 @@
+name: Test Ticket to Ride Scorer
+
+# Runs the Ticket to Ride app's tests (Python for the server and photo reading,
+# Node for the scoring that runs in the page) and checks its image builds,
+# whenever the app changes.
+
+on:
+  pull_request:
+    paths:
+      - "ticket_to_ride/**"
+      - ".github/workflows/test-ticket-to-ride.yml"
+  push:
+    branches: [main]
+    paths:
+      - "ticket_to_ride/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ticket_to_ride
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: pip install -r app/requirements.txt pytest
+      - name: Run tests
+        run: python -m pytest -q
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image
+        run: docker build -t ticket-to-ride ticket_to_ride
+      - name: Check it serves the page
+        run: |
+          docker run -d --name ttr -p 8099:8099 ticket-to-ride
+          for i in $(seq 1 20); do curl -fsS http://localhost:8099/api/maps && break; sleep 1; done
+          curl -fsS http://localhost:8099/ | grep -q "Ticket to Ride"
+          curl -fsS http://localhost:8099/api/maps/europe > /dev/null
+          docker logs ttr

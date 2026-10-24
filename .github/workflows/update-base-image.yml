@@ -34,6 +34,7 @@ jobs:
             ["jellyfin"]="ghcr.io/jellyfin/jellyfin:latest"
             ["jellyfin_nvidia"]="ghcr.io/jellyfin/jellyfin:latest"
             ["immich_memories"]="library/python:3.13-slim"
+            ["ticket_to_ride"]="library/python:3.13-slim"
           )
 
           # Resolve the manifest (list) digest for an image ref, on Docker Hub
