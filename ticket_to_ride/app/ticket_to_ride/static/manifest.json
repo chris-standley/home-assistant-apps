@@ -1,0 +1,10 @@
+{
+  "name": "Ticket to Ride Scorer",
+  "short_name": "TTR Scorer",
+  "start_url": "../",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#f6efe2",
+  "theme_color": "#7a2e1d",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

@@ -3,7 +3,8 @@
 A Home Assistant apps repository that wraps **official** upstream Docker images
 so they can be installed and managed as Home Assistant apps — currently
 **Channels DVR** and **Jellyfin**, each with an Intel/AMD and an NVIDIA variant —
-plus my own **Moonlight** family wall calendar and **Immich Memories**.
+plus my own **Moonlight** family wall calendar, **Immich Memories** and a
+**Ticket to Ride** scorer.
 
 > ## ⚠️ Unofficial — not affiliated with the upstream projects
 >
@@ -29,6 +30,7 @@ run both at once.)
 | --- | --- | --- |
 | **Moonlight** — family wall calendar, chores, lists and meals ([source](https://github.com/chris-standley/Moonlight-Calendar)) | [`moonlight`](./moonlight) | `8091` |
 | **Immich Memories** — Apple Photos style memories (curated, named albums) for an Immich server | [`immich_memories`](./immich_memories) | — |
+| **Ticket to Ride Scorer** — photograph the board and tickets, get everyone's final score (USA and Europe) | [`ticket_to_ride`](./ticket_to_ride) | ingress (optional `8099`) |
 
 > **Which GPU variant?** *Quick Sync* is Intel-only; AMD uses its VCN encoder.
 > On Linux both are reached through the same `/dev/dri` render node, so the
@@ -137,7 +139,8 @@ Each app splits the same way:
 ├── jellyfin/                # Jellyfin — Intel / AMD (VA-API)
 ├── jellyfin_nvidia/         # Jellyfin — NVIDIA (NVENC)
 ├── moonlight/               # Moonlight — prebuilt image from chris-standley/Moonlight-Calendar
-└── immich_memories/         # Immich Memories — Python app (source in app/, tests in tests/)
+├── immich_memories/         # Immich Memories — Python app (source in app/, tests in tests/)
+└── ticket_to_ride/          # Ticket to Ride Scorer — Python server + web page (source in app/, tests in tests/)
 ```
 
 Each app folder contains: `config.yaml` (manifest), `Dockerfile` (wraps the
@@ -146,6 +149,8 @@ digest-pinned official image), `README.md`, `DOCS.md`, and `CHANGELOG.md`.
 `immich_memories/` also has its source (`app/`), tests (`tests/`) and option
 translations; its tests run in CI on every change
 ([`.github/workflows/test-immich-memories.yml`](.github/workflows/test-immich-memories.yml)).
+`ticket_to_ride/` is laid out the same way, with its own workflow
+([`.github/workflows/test-ticket-to-ride.yml`](.github/workflows/test-ticket-to-ride.yml)).
 
 ### Optional assets
 
