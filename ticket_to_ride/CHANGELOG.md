@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 — 2026-10-25
+
+- Updated the base image to a new upstream build (tracks the `3.13-slim` tag).
+  This refreshes the bundled runtime (ffmpeg / OS / GPU libraries).
+  Pinned digest: `sha256:d98cc29d3266e535dd9da1099688d9cb3ca4753813571e071763d17725460962`
+
+
 ## 0.1.0
 
 - First release. Photograph the board and each player's destination tickets
