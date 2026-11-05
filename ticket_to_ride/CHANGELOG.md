@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.5 — 2026-11-05
+
+- Updated the base image to a new upstream build (tracks the `3.13-slim` tag).
+  This refreshes the bundled runtime (ffmpeg / OS / GPU libraries).
+  Pinned digest: `sha256:09a17cad02668ae61ece136b4fd36ac3849e14f670ebedb637ea3e15580525bc`
+
+
 ## 0.1.4 — 2026-11-02
 
 - Updated the base image to a new upstream build (tracks the `3.13-slim` tag).

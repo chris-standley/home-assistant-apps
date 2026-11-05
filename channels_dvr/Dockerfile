@@ -10,7 +10,7 @@
 #
 # Since Supervisor 2026.04.0 the BUILD_FROM arg is no longer injected, so we
 # declare our own default here.
-ARG BUILD_FROM=fancybits/channels-dvr@sha256:438e362cf739f4d002ecdcc17baee6917ecd22a8d9d4aa044288042c1039d591
+ARG BUILD_FROM=fancybits/channels-dvr@sha256:8b430c5865c95378750226f0198c49332d084c276485053146c8ebfc020f0abf
 FROM ${BUILD_FROM}
 
 # The upstream image already defines ENTRYPOINT/CMD that launch the DVR server,

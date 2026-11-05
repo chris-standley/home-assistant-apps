@@ -1,7 +1,7 @@
 # Home Assistant app configuration for Channels DVR Server
 # Docs: https://developers.home-assistant.io/docs/apps/configuration
 name: Channels DVR (Intel / AMD)
-version: "1.0.2"
+version: "1.0.3"
 slug: channels_dvr
 description: >-
   Channels DVR Server with Intel Quick Sync / AMD VA-API hardware transcoding —
