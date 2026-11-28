@@ -7,7 +7,7 @@
 #
 # Since Supervisor 2026.04.0 the BUILD_FROM arg is no longer injected, so we
 # declare our own default here.
-ARG BUILD_FROM=library/python@sha256:7249d5587b78209a006dc4a3b5340678f84ea729239193aa559962cd8c1fce50
+ARG BUILD_FROM=library/python@sha256:168d3a5d10f2152f8e8d77b6843ac82c22a846cfefeef7afdf9aa630404e82a7
 FROM ${BUILD_FROM}
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
